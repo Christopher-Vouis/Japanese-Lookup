@@ -4,11 +4,12 @@ var parseJapanese = function(text)
 	let japaneseStrings = new Array();
 	let isJapanese = false;
 	let currentString = "";
+	let maxStrings = 5, stringLimit = 0;
+
 	for(let i = 0; i < text.length; ++i)
 	{
 		c = parseInt(text.charCodeAt(i));
-		if((c >= 0x3000 && c <=0x30ff) || (c >= 0xff00 && c <= 0xffef)
-		 || (c >= 0x4e00 && c <= 0x9faf) ||(c >= 0x3400 && c <= 0x4db0))
+		if(isJapaneseUnicode(c))
 		{
 			currentString += text[i];
 			isJapanese = true;
@@ -32,6 +33,18 @@ var parseJapanese = function(text)
 	return japaneseStrings;
 }
 
+var isJapaneseUnicode = function(code) {
+		if((code >= 0x3000 && code <=0x30ff) || (code >= 0xff00 && code <= 0xffef) || 
+			(code >= 0x4e00 && code <= 0x9faf) || (code >= 0x3400 && code <= 0x4db0))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+}
+
 document.addEventListener('mousedown', function(event) {
 	if(event.button == 2)
 	{
@@ -42,7 +55,16 @@ document.addEventListener('mousedown', function(event) {
 			let japaneseStrings = parseJapanese(selection);
 			if(japaneseStrings.length > 0)
 			{
-				for(let i = 0; i < japaneseStrings.length; ++i)
+				if(japaneseStrings.length < 5)
+				{
+					stringLimit = japaneseStrings.length;
+				}
+				else
+				{
+					stringLimit = 5;
+				}
+
+				for(let i = 0; i < stringLimit; ++i)
 				{
 					chrome.runtime.sendMessage({from:"JLookup", string: japaneseStrings[i]});
 				}
